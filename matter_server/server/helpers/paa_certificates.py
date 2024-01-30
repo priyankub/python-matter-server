@@ -22,10 +22,10 @@ LOGGER = logging.getLogger(__name__)
 PRODUCTION_URL = "https://on.dcl.csa-iot.org"
 TEST_URL = "https://on.test-net.dcl.csa-iot.org"
 GIT_URL = "https://github.com/project-chip/connectedhomeip/raw/master/credentials/development/paa-root-certs"  # pylint: disable=line-too-long
-GIT_CERTS = [
-    "Chip-Test-PAA-FFF1-Cert",
-    "Chip-Test-PAA-NoVID-Cert",
-]
+#GIT_CERTS = [
+#    "Chip-Test-PAA-FFF1-Cert",
+#    "Chip-Test-PAA-NoVID-Cert",
+#]
 LAST_CERT_IDS: set[str] = set()
 
 
