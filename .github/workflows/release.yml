@@ -48,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+      id-token: write
     needs: build-and-publish-pypi
     steps:
       - uses: actions/checkout@v4.1.1
