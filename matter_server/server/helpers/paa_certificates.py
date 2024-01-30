@@ -113,19 +113,30 @@ async def fetch_dcl_certificates(
 
 
 async def fetch_git_certificates() -> int:
-    """Fetch Git PAA Certificates."""
+    """Fetch all Git PAA Certificates."""
     fetch_count = 0
-    LOGGER.info("Fetching the latest PAA root certificates from Git.")
+    LOGGER.info("Fetching all PAA root certificates from Git.")
     try:
         async with ClientSession(raise_for_status=True) as http_session:
-            for cert in GIT_CERTS:
-                if cert in LAST_CERT_IDS:
+            # Fetch the list of certificates in the directory from GIT_URL
+            async with http_session.get(f"{GIT_URL}") as response:
+                directory_listing = await response.text()
+
+            # Process each certificate dynamically
+            for cert_name in directory_listing.split('\n'):
+                if not cert_name:
                     continue
 
-                async with http_session.get(f"{GIT_URL}/{cert}.pem") as response:
+                if cert_name in LAST_CERT_IDS:
+                    continue
+
+                # Fetch each certificate by name
+                async with http_session.get(f"{GIT_URL}/{cert_name}") as response:
                     certificate = await response.text()
-                await write_paa_root_cert(certificate, cert)
-                LAST_CERT_IDS.add(cert)
+
+                # Write the certificate to file
+                await write_paa_root_cert(certificate, cert_name)
+                LAST_CERT_IDS.add(cert_name)
                 fetch_count += 1
     except ClientError as err:
         LOGGER.warning(
