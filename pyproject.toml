@@ -3,15 +3,15 @@ requires = ["setuptools>=62.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "python-matter-server"
+name = "python-matter-server-priyankub"
 # The version is set by GH action on release
 version = "0.0.0"
 license     = {text = "Apache-2.0"}
-description = "Python Matter WebSocket Server"
+description = "Python Matter WebSocket Server Fixes"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    {name = "The Home Assistant Authors", email = "hello@home-assistant.io"}
+    {name = "Just another pretend developer", email = "priyanku.mgr@gmail.com"}
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
