@@ -11,6 +11,7 @@ import asyncio
 import logging
 from os import makedirs
 import re
+import requests
 
 from aiohttp import ClientError, ClientSession
 from cryptography import x509
@@ -22,10 +23,31 @@ LOGGER = logging.getLogger(__name__)
 PRODUCTION_URL = "https://on.dcl.csa-iot.org"
 TEST_URL = "https://on.test-net.dcl.csa-iot.org"
 GIT_URL = "https://github.com/project-chip/connectedhomeip/raw/master/credentials/development/paa-root-certs"  # pylint: disable=line-too-long
-#GIT_CERTS = [
-#    "Chip-Test-PAA-FFF1-Cert",
-#    "Chip-Test-PAA-NoVID-Cert",
-#]
+
+def get_directory_contents(owner, repo, path):
+    api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        contents = response.json()
+        return [item['name'] for item in contents]
+    else:
+        print(f"Failed to fetch directory contents. Status code: {response.status_code}")
+        return []
+
+# Git repo details
+owner = "project-chip"
+repo = "connectedhomeip"
+path = "credentials/development/paa-root-certs"
+file_list = get_directory_contents(owner, repo, path)
+
+# Filter out extension and remove duplicates
+unique_file_names = list({file.split('.')[0] for file in file_list})
+
+# Set GIT_CERTS variable
+GIT_CERTS = unique_file_names
+
+
 LAST_CERT_IDS: set[str] = set()
 
 
@@ -113,30 +135,19 @@ async def fetch_dcl_certificates(
 
 
 async def fetch_git_certificates() -> int:
-    """Fetch all Git PAA Certificates."""
+    """Fetch Git PAA Certificates."""
     fetch_count = 0
-    LOGGER.info("Fetching all PAA root certificates from Git.")
+    LOGGER.info("Fetching the latest PAA root certificates from Git.")
     try:
         async with ClientSession(raise_for_status=True) as http_session:
-            # Fetch the list of certificates in the directory from GIT_URL
-            async with http_session.get(f"{GIT_URL}") as response:
-                directory_listing = await response.text()
-
-            # Process each certificate dynamically
-            for cert_name in directory_listing.split('\n'):
-                if not cert_name:
+            for cert in GIT_CERTS:
+                if cert in LAST_CERT_IDS:
                     continue
 
-                if cert_name in LAST_CERT_IDS:
-                    continue
-
-                # Fetch each certificate by name
-                async with http_session.get(f"{GIT_URL}/{cert_name}") as response:
+                async with http_session.get(f"{GIT_URL}/{cert}.pem") as response:
                     certificate = await response.text()
-
-                # Write the certificate to file
-                await write_paa_root_cert(certificate, cert_name)
-                LAST_CERT_IDS.add(cert_name)
+                await write_paa_root_cert(certificate, cert)
+                LAST_CERT_IDS.add(cert)
                 fetch_count += 1
     except ClientError as err:
         LOGGER.warning(
