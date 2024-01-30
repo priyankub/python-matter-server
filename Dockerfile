@@ -28,7 +28,7 @@ ARG PYTHON_MATTER_SERVER
 
 # hadolint ignore=DL3013
 RUN \
-    pip3 install --no-cache-dir "python-matter-server[server]==${PYTHON_MATTER_SERVER}"
+    pip3 install --no-cache-dir "python-matter-server-priyankub[server]==${PYTHON_MATTER_SERVER}"
 
 VOLUME ["/data"]
 EXPOSE 5580
