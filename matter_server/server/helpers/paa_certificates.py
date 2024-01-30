@@ -68,11 +68,10 @@ async def fetch_dcl_certificates(
     # if we're going to fetch both prod and test, do test first
     # so any duplicates will be overwritten/preferred by the production version
     # NOTE: While Matter is in BETA we fetch the test certificates by default
-    if fetch_test_certificates:
-        base_urls.add(TEST_URL)
     if fetch_production_certificates:
         base_urls.add(PRODUCTION_URL)
-
+    if fetch_test_certificates:
+        base_urls.add(TEST_URL)
     try:
         async with ClientSession(raise_for_status=True) as http_session:
             for url_base in base_urls:
