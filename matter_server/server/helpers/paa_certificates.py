@@ -24,6 +24,7 @@ PRODUCTION_URL = "https://on.dcl.csa-iot.org"
 TEST_URL = "https://on.test-net.dcl.csa-iot.org"
 GIT_URL = "https://github.com/project-chip/connectedhomeip/raw/master/credentials/development/paa-root-certs"  # pylint: disable=line-too-long
 
+
 def get_directory_contents(owner, repo, path):
     """
     Fetch directory contents from a GitHub repository.
@@ -45,6 +46,7 @@ def get_directory_contents(owner, repo, path):
     else:
         LOGGER.error(f"Failed to fetch directory contents. Status code: {response.status_code}")
         return []
+
 
 # Git repo details
 owner = "project-chip"
@@ -100,7 +102,7 @@ async def fetch_dcl_certificates(
     # determine which url's need to be queried.
     # if we're going to fetch both prod and test, do test first
     # so any duplicates will be overwritten/preferred by the production version.
- 
+
     # NOTE: While Matter is in BETA we fetch the test certificates by default
     if fetch_test_certificates:
         base_urls.add(TEST_URL)
@@ -145,10 +147,11 @@ async def fetch_dcl_certificates(
 
     return fetch_count
 
+
 # Manufacturers release test certificates through the SDK (Git) as a part
 # of their standard product release workflow. This will ensure those certs
 # are correctly captured
-    
+
 async def fetch_git_certificates() -> int:
     """Fetch Git PAA Certificates."""
     fetch_count = 0
