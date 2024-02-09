@@ -11,11 +11,11 @@ import asyncio
 import logging
 from os import makedirs
 import re
-import requests
 
 from aiohttp import ClientError, ClientSession
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
+import requests
 
 from matter_server.server.const import PAA_ROOT_CERTS_DIR
 
