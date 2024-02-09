@@ -1,4 +1,5 @@
 """Matter Client implementation."""
+
 from __future__ import annotations
 
 import asyncio
@@ -9,6 +10,7 @@ import uuid
 
 from aiohttp import ClientSession
 from chip.clusters import Objects as Clusters
+from chip.clusters.Types import NullValue
 
 from matter_server.common.errors import ERROR_MAP, NodeNotExists
 
@@ -257,6 +259,7 @@ class MatterClient:
 
     async def node_diagnostics(self, node_id: int) -> NodeDiagnostics:
         """Gather diagnostics for the given node."""
+        # pylint: disable=too-many-statements
         node = self.get_node(node_id)
         # grab some details from the first (operational) network interface
         network_type = NetworkType.UNKNOWN
@@ -304,7 +307,10 @@ class MatterClient:
             thread_cluster: Clusters.ThreadNetworkDiagnostics = node.get_cluster(
                 0, Clusters.ThreadNetworkDiagnostics
             )
-            network_name = thread_cluster.networkName
+            if isinstance(thread_cluster.networkName, bytes):
+                network_name = thread_cluster.networkName.decode("utf-8")
+            elif thread_cluster.networkName != NullValue:
+                network_name = thread_cluster.networkName
             # parse routing role to (diagnostics) node type
             if (
                 thread_cluster.routingRole
@@ -322,17 +328,49 @@ class MatterClient:
             ):
                 node_type = NodeType.END_DEVICE
         elif network_type == NetworkType.WIFI:
-            wifi_cluster: Clusters.WiFiNetworkDiagnostics = node.get_cluster(
-                0, Clusters.WiFiNetworkDiagnostics
-            )
-            if wifi_cluster and wifi_cluster.bssid:
-                network_name = wifi_cluster.bssid
             node_type = NodeType.END_DEVICE
+        # use lastNetworkID from NetworkCommissioning cluster as fallback to get the network name
+        # this allows getting the SSID as the wifi diagnostics cluster only has the BSSID
+        last_network_id: bytes | str | None
+        if not network_name and (
+            last_network_id := node.get_attribute_value(
+                0,
+                cluster=None,
+                attribute=Clusters.NetworkCommissioning.Attributes.LastNetworkID,
+            )
+        ):
+            if isinstance(last_network_id, bytes):
+                network_name = last_network_id.decode("utf-8")
+            elif last_network_id != NullValue:
+                network_name = last_network_id
+        # last resort to get the (wifi) networkname;
+        # enumerate networks on the NetworkCommissioning cluster
+        networks: list[Clusters.NetworkCommissioning.Structs.NetworkInfoStruct]
+        if not network_name and (
+            networks := node.get_attribute_value(
+                0,
+                cluster=None,
+                attribute=Clusters.NetworkCommissioning.Attributes.Networks,
+            )
+        ):
+            for network in networks:
+                if not network.connected:
+                    continue
+                if isinstance(network.networkID, bytes):
+                    network_name = network.networkID.decode("utf-8")
+                    break
+                if network.networkID != NullValue:
+                    network_name = network.networkID
+                    break
         # override node type if node is a bridge
         if node.node_data.is_bridge:
             node_type = NodeType.BRIDGE
         # get active fabrics for this node
         active_fabrics = await self.get_matter_fabrics(node_id)
+        # get active fabric index
+        fabric_index = node.get_attribute_value(
+            0, None, Clusters.OperationalCredentials.Attributes.CurrentFabricIndex
+        )
         return NodeDiagnostics(
             node_id=node_id,
             network_type=network_type,
@@ -342,6 +380,7 @@ class MatterClient:
             mac_address=mac_address,
             available=node.available,
             active_fabrics=active_fabrics,
+            active_fabric_index=fabric_index,
         )
 
     async def send_device_command(
