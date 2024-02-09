@@ -55,7 +55,16 @@ async def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
             return []
 
 
-async def get_git_file_list():
+async def get_git_file_list() -> List[str]:
+    """
+    Retrieve a list of unique file names from a Git repository.
+
+    This function fetches the list of file names from a specified path in a Git repository,
+    filters out the file extensions, and returns a list of unique file names.
+
+    Returns:
+        List[str]: A list of unique file names.
+    """
     file_list = await get_directory_contents(OWNER, REPO, PATH)
     # Filter out extension and remove duplicates
     unique_file_names = list({file.split(".")[0] for file in file_list})
