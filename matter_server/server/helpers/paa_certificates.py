@@ -16,7 +16,6 @@ from typing import List
 from aiohttp import ClientError, ClientSession
 from cryptography import x509
 from cryptography.hazmat.primitives import serialization
-import requests
 
 from matter_server.server.const import PAA_ROOT_CERTS_DIR
 
@@ -31,7 +30,7 @@ REPO = "connectedhomeip"
 PATH = "credentials/development/paa-root-certs"
 
 
-def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
+async def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
     """
     Fetch directory contents from a GitHub repository.
 
@@ -44,16 +43,16 @@ def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
         list: A list of file names in the specified directory.
     """
     api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
-    response = requests.get(api_url, timeout=20)
+    async with ClientSession() as session:
+        async with session.get(api_url, timeout=20) as response:
+            if response.status == 200:
+                contents = await response.json()
+                return [item["name"] for item in contents]
 
-    if response.status_code == 200:
-        contents = response.json()
-        return [item["name"] for item in contents]
-
-    LOGGER.error(
-        "Failed to fetch directory contents. Status code: %s", response.status_code
-    )
-    return []
+            LOGGER.error(
+                "Failed to fetch directory contents. Status code: %s", response.status
+            )
+            return []
 
 
 file_list = get_directory_contents(OWNER, REPO, PATH)
