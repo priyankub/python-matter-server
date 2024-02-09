@@ -25,6 +25,18 @@ TEST_URL = "https://on.test-net.dcl.csa-iot.org"
 GIT_URL = "https://github.com/project-chip/connectedhomeip/raw/master/credentials/development/paa-root-certs"  # pylint: disable=line-too-long
 
 def get_directory_contents(owner, repo, path):
+    """
+    Fetch directory contents from a GitHub repository.
+
+    Args:
+        owner (str): The owner of the GitHub repository.
+        repo (str): The name of the GitHub repository.
+        path (str): The path within the repository.
+
+    Returns:
+        list: A list of file names in the specified directory.
+    """
+        
     api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
     response = requests.get(api_url)
 
@@ -32,7 +44,7 @@ def get_directory_contents(owner, repo, path):
         contents = response.json()
         return [item['name'] for item in contents]
     else:
-        print(f"Failed to fetch directory contents. Status code: {response.status_code}")
+        LOGGER.error(f"Failed to fetch directory contents. Status code: {response.status_code}")
         return []
 
 # Git repo details
@@ -88,12 +100,13 @@ async def fetch_dcl_certificates(
     base_urls = set()
     # determine which url's need to be queried.
     # if we're going to fetch both prod and test, do test first
-    # so any duplicates will be overwritten/preferred by the production version
+    # so any duplicates will be overwritten/preferred by the production version.
+ 
     # NOTE: While Matter is in BETA we fetch the test certificates by default
-    if fetch_production_certificates:
-        base_urls.add(PRODUCTION_URL)
     if fetch_test_certificates:
         base_urls.add(TEST_URL)
+    if fetch_production_certificates:
+        base_urls.add(PRODUCTION_URL)        
     try:
         async with ClientSession(raise_for_status=True) as http_session:
             for url_base in base_urls:
@@ -133,7 +146,10 @@ async def fetch_dcl_certificates(
 
     return fetch_count
 
-
+# Manufacturers release test certificates through the SDK (Git) as a part
+# of their standard product release workflow. This will ensure those certs
+# are correctly captured
+    
 async def fetch_git_certificates() -> int:
     """Fetch Git PAA Certificates."""
     fetch_count = 0
