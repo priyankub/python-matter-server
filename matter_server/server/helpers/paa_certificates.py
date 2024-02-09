@@ -24,6 +24,11 @@ PRODUCTION_URL = "https://on.dcl.csa-iot.org"
 TEST_URL = "https://on.test-net.dcl.csa-iot.org"
 GIT_URL = "https://github.com/project-chip/connectedhomeip/raw/master/credentials/development/paa-root-certs"  # pylint: disable=line-too-long
 
+# Git repo details
+OWNER = "project-chip"
+REPO = "connectedhomeip"
+PATH = "credentials/development/paa-root-certs"
+
 
 def get_directory_contents(owner, repo, path):
     """
@@ -38,23 +43,19 @@ def get_directory_contents(owner, repo, path):
         list: A list of file names in the specified directory.
     """
     api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
-    response = requests.get(api_url)
+    response = requests.get(api_url, timeout=20)
 
     if response.status_code == 200:
         contents = response.json()
         return [item["name"] for item in contents]
-    else:
-        LOGGER.error(
-            f"Failed to fetch directory contents. Status code: {response.status_code}"
-        )
-        return []
+
+    LOGGER.error(
+        "Failed to fetch directory contents. Status code: %s", response.status_code
+    )
+    return []
 
 
-# Git repo details
-owner = "project-chip"
-repo = "connectedhomeip"
-path = "credentials/development/paa-root-certs"
-file_list = get_directory_contents(owner, repo, path)
+file_list = get_directory_contents(OWNER, REPO, PATH)
 
 # Filter out extension and remove duplicates
 unique_file_names = list({file.split(".")[0] for file in file_list})
