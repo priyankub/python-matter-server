@@ -11,6 +11,7 @@ import asyncio
 import logging
 from os import makedirs
 import re
+from typing import Optional
 from typing import List
 
 from aiohttp import ClientError, ClientSession
