@@ -36,7 +36,6 @@ def get_directory_contents(owner, repo, path):
     Returns:
         list: A list of file names in the specified directory.
     """
-        
     api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
     response = requests.get(api_url)
 
@@ -106,7 +105,7 @@ async def fetch_dcl_certificates(
     if fetch_test_certificates:
         base_urls.add(TEST_URL)
     if fetch_production_certificates:
-        base_urls.add(PRODUCTION_URL)        
+        base_urls.add(PRODUCTION_URL)
     try:
         async with ClientSession(raise_for_status=True) as http_session:
             for url_base in base_urls:
