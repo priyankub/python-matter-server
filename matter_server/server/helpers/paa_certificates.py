@@ -55,13 +55,12 @@ async def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
             return []
 
 
-file_list = await get_directory_contents(OWNER, REPO, PATH)
-
-# Filter out extension and remove duplicates
-unique_file_names = list({file.split(".")[0] for file in file_list})
-
-# Set GIT_CERTS variable
-GIT_CERTS = unique_file_names
+async def get_git_file_list():
+    file_list = await get_directory_contents(OWNER, REPO, PATH)
+    # Filter out extension and remove duplicates
+    unique_file_names = list({file.split(".")[0] for file in file_list})
+    return unique_file_names
+GIT_CERTS = asyncio.run(get_git_file_list())
 
 
 LAST_CERT_IDS: set[str] = set()
