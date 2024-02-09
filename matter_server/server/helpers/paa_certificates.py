@@ -42,9 +42,11 @@ def get_directory_contents(owner, repo, path):
 
     if response.status_code == 200:
         contents = response.json()
-        return [item['name'] for item in contents]
+        return [item["name"] for item in contents]
     else:
-        LOGGER.error(f"Failed to fetch directory contents. Status code: {response.status_code}")
+        LOGGER.error(
+            f"Failed to fetch directory contents. Status code: {response.status_code}"
+        )
         return []
 
 
@@ -55,7 +57,7 @@ path = "credentials/development/paa-root-certs"
 file_list = get_directory_contents(owner, repo, path)
 
 # Filter out extension and remove duplicates
-unique_file_names = list({file.split('.')[0] for file in file_list})
+unique_file_names = list({file.split(".")[0] for file in file_list})
 
 # Set GIT_CERTS variable
 GIT_CERTS = unique_file_names
@@ -151,6 +153,7 @@ async def fetch_dcl_certificates(
 # Manufacturers release test certificates through the SDK (Git) as a part
 # of their standard product release workflow. This will ensure those certs
 # are correctly captured
+
 
 async def fetch_git_certificates() -> int:
     """Fetch Git PAA Certificates."""
