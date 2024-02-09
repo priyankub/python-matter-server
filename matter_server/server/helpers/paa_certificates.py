@@ -53,7 +53,7 @@ def get_directory_contents(owner: str, repo: str, path: str) -> Optional[List[st
     LOGGER.error(
         "Failed to fetch directory contents. Status code: %s", response.status_code
     )
-    return None
+    return []
 
 
 file_list = get_directory_contents(OWNER, REPO, PATH)
