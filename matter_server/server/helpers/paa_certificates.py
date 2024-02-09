@@ -55,7 +55,7 @@ async def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
             return []
 
 
-file_list = get_directory_contents(OWNER, REPO, PATH)
+file_list = await get_directory_contents(OWNER, REPO, PATH)
 
 # Filter out extension and remove duplicates
 unique_file_names = list({file.split(".")[0] for file in file_list})
