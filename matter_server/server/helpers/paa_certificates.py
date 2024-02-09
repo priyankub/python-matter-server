@@ -11,7 +11,7 @@ import asyncio
 import logging
 from os import makedirs
 import re
-from typing import List, Optional
+from typing import List
 
 from aiohttp import ClientError, ClientSession
 from cryptography import x509
@@ -31,7 +31,7 @@ REPO = "connectedhomeip"
 PATH = "credentials/development/paa-root-certs"
 
 
-def get_directory_contents(owner: str, repo: str, path: str) -> Optional[List[str]]:
+def get_directory_contents(owner: str, repo: str, path: str) -> List[str]:
     """
     Fetch directory contents from a GitHub repository.
 
