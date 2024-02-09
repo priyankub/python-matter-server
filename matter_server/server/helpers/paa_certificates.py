@@ -11,6 +11,7 @@ import asyncio
 import logging
 from os import makedirs
 import re
+from typing import List
 
 from aiohttp import ClientError, ClientSession
 from cryptography import x509
@@ -30,7 +31,7 @@ REPO = "connectedhomeip"
 PATH = "credentials/development/paa-root-certs"
 
 
-def get_directory_contents(owner, repo, path):
+def get_directory_contents(owner: str, repo: str, path: str) -> Optional[List[str]]:
     """
     Fetch directory contents from a GitHub repository.
 
@@ -52,7 +53,7 @@ def get_directory_contents(owner, repo, path):
     LOGGER.error(
         "Failed to fetch directory contents. Status code: %s", response.status_code
     )
-    return []
+    return None
 
 
 file_list = get_directory_contents(OWNER, REPO, PATH)
