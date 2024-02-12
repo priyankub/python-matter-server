@@ -27,7 +27,7 @@ PATH = "credentials/development/paa-root-certs"
 LOGGER = logging.getLogger(__name__)
 PRODUCTION_URL = "https://on.dcl.csa-iot.org"
 TEST_URL = "https://on.test-net.dcl.csa-iot.org"
-GIT_URL = f"https://github.com/{OWNER}/{REPO}/raw/{PATH}"
+GIT_URL = f"https://raw.githubusercontent.com/{OWNER}/{REPO}/master/{PATH}"
 
 
 LAST_CERT_IDS: set[str] = set()
