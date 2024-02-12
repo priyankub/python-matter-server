@@ -151,7 +151,9 @@ async def fetch_git_certificates() -> int:
     """Fetch Git PAA Certificates."""
     fetch_count = 0
     LOGGER.info("Fetching the latest PAA root certificates from Git.")
-    git_certs = await get_directory_contents(OWNER, REPO, PATH)
+    file_list = await get_directory_contents(OWNER, REPO, PATH)
+    # Filter out extension and remove duplicates
+    git_certs = list({file.split(".")[0] for file in file_list})
     try:
         async with ClientSession(raise_for_status=True) as http_session:
             for cert in git_certs:
