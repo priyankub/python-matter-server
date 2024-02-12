@@ -19,15 +19,16 @@ from cryptography.hazmat.primitives import serialization
 
 from matter_server.server.const import PAA_ROOT_CERTS_DIR
 
-LOGGER = logging.getLogger(__name__)
-PRODUCTION_URL = "https://on.dcl.csa-iot.org"
-TEST_URL = "https://on.test-net.dcl.csa-iot.org"
-GIT_URL = "https://github.com/project-chip/connectedhomeip/raw/master/credentials/development/paa-root-certs"  # pylint: disable=line-too-long
-
 # Git repo details
 OWNER = "project-chip"
 REPO = "connectedhomeip"
 PATH = "credentials/development/paa-root-certs"
+
+LOGGER = logging.getLogger(__name__)
+PRODUCTION_URL = "https://on.dcl.csa-iot.org"
+TEST_URL = "https://on.test-net.dcl.csa-iot.org"
+GIT_URL = f"https://github.com/{OWNER}/{REPO}/raw/{PATH}"
+
 
 LAST_CERT_IDS: set[str] = set()
 
